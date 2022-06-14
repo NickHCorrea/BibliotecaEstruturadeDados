@@ -64,6 +64,27 @@ class SkipList:
                 newNode.next[i] = update[i].next[i]
                 update[i].next[i] = newNode
 
+    def delete(self, x):
+        p = self.head
+        update = [nil] * self.maxLevel
+        level = p.level - 1
+        while level >= 0:
+            if p.next[level].key == x:
+                for i in range(p.next[0].level):
+                    if isinstance(update[i], Nil):
+                        break
+                    else:
+                        if update[i].next[i] != p.next[0]:
+                            break
+                        else:
+                            update[i].next[i] = p.next[0].next[i]
+            if p.next[level].key < x:
+                p = p.next[level]
+            else:
+                update[level] = p
+                level = level - 1
+
+
     def displayList(self):
         print("\n*****Skip List******")
         head = self.head
@@ -77,10 +98,12 @@ class SkipList:
 
 
 Mysl = SkipList()
+Mysl.insert(1, "a")
 Mysl.insert(2, "b")
 Mysl.insert(3, "b")
 Mysl.insert(4, "b")
-Mysl.insert(6, "b")
-print(Mysl.find(1))
+Mysl.insert(5, "b")
+Mysl.displayList()
+Mysl.delete(2)
 
-Mysl.displayList()  
+Mysl.displayList()
