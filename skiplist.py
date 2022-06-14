@@ -1,3 +1,4 @@
+import random
 class Nil:
     def __init__(self):
         self.key = float('inf')
@@ -41,8 +42,9 @@ class SkipList:
     def insert(self, x, v, p="", l=0):
         if p == "":
             p = self.head
-        level = self.maxLevel
+        level = self.maxLevel - 1
         while level >= 0:
+            
             if p.next[level].key == x:
                 raise("Chave já inserida")
             if p.next[level].key < x:
@@ -50,4 +52,13 @@ class SkipList:
                 return self.insert(x, v, p)
             else:
                 level = level - 1
-        newNode = SkipListNode(x, v, self.createLevel())
+        newLevel = self.createLevel() - 1
+        newNode = SkipListNode(x, v, newLevel+1)
+        while newLevel >=0:
+            newNode.next[newLevel] = p.next[newLevel]
+            p.next[newLevel] = newNode
+            newLevel = newLevel - 1
+
+Mysl=SkipList()
+Mysl.insert(1, "a" )
+print(Mysl.head.next[0].next) 
