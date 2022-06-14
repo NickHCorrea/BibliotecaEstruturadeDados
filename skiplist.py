@@ -22,6 +22,7 @@ class SkipList:
     def __init__(self):
         self.maxLevel = 5
         self.head = SkipListNode(float('-inf'), None, self.maxLevel)
+        self.usedLevel = 0
 
     def find(self, x):
         p = self.head
@@ -55,6 +56,8 @@ class SkipList:
                 update[level] = p
                 level = level - 1
         newLevel = self.createLevel() + 1
+        if newLevel>self.usedLevel:
+            self.usedLevel = newLevel
         newNode = SkipListNode(x, v, newLevel)
         if newLevel == 0:
             newNode.next[0] = update[0].next[0]
@@ -66,24 +69,21 @@ class SkipList:
 
     def delete(self, x):
         p = self.head
+        level = self.usedLevel - 1
         update = [nil] * self.maxLevel
-        level = p.level - 1
         while level >= 0:
-            if p.next[level].key == x:
-                for i in range(p.next[0].level):
-                    if isinstance(update[i], Nil):
-                        break
-                    else:
-                        if update[i].next[i] != p.next[0]:
-                            break
-                        else:
-                            update[i].next[i] = p.next[0].next[i]
             if p.next[level].key < x:
                 p = p.next[level]
             else:
-                update[level] = p
+                update[level]=p
                 level = level - 1
 
+        p = p.next[0]
+        if not isinstance(p, Nil) and p.key == x:
+            for i in range(self.usedLevel):
+                if update[i].next [i] != p:
+                    break
+                update[i].next[i] = p.next[i]
 
     def displayList(self):
         print("\n*****Skip List******")
@@ -103,7 +103,5 @@ Mysl.insert(2, "b")
 Mysl.insert(3, "b")
 Mysl.insert(4, "b")
 Mysl.insert(5, "b")
-Mysl.displayList()
-Mysl.delete(2)
 
 Mysl.displayList()
