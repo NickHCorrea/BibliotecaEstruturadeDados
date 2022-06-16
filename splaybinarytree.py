@@ -41,24 +41,36 @@ class splaybinaryTree:
     def splay(self, p=""):
         if p == "":
             p = self.root
-        while not isinstance(p.parent,Nil):
+        while not isinstance(p.parent, Nil):
             if p.parent == self.root:
                 if self.root.left == p:
-                    self.rotRight(self.root)
+                    newParent = p.parent.parent
+                    p.parent = self.rotRight(p.parent)
+                    p.parent = newParent
                 else:
-                    self.rotLeft(self.root)
+                    newParent = p.parent.parent
+                    p.parent = self.rotLeft(p.parent)
+                    p.parent = newParent
             elif p.parent.left == p and p.parent.parent.left == p.parent:  # Left Left grandkid - zig zig
-                self.rotRight(p.parent.parent)
-                self.rotRight(p.parent)
+                newParent = p.parent.parent.parent
+                p.parent.parent = self.rotRight(p.parent.parent)
+                p.parent = self.rotRight(p.parent)
+                p.parent = newParent
             elif p.parent.right == p and p.parent.parent.right == p.parent:  # right right grandkid - zig zig
-                self.rotLeft(p.parent.parent)
-                self.rotLeft(p.parent)
+                newParent = p.parent.parent.parent
+                p.parent.parent = self.rotLeft(p.parent.parent)
+                p.parent = self.rotLeft(p.parent)
+                p.parent = newParent
             elif p.parent.right == p and p.parent.parent.left == p.parent:  # left right grandkid - zig zag
-                self.rotLeft(p.parent)
-                self.rotRight(p.parent.parent)
+                newParent = p.parent.parent.parent
+                p.parent = self.rotLeft(p.parent)
+                p.parent.parent = self.rotRight(p.parent.parent)
+                p.parent = newParent
             elif p.parent.left == p and p.parent.parent.right == p.parent:  # right left grandkid - zig zag
-                self.rotRight(p.parent)
-                self.rotLeft(p.parent.parent)
+                newParent = p.parent.parent.parent
+                p.parent = self.rotRight(p.parent)
+                p.parent.parent = self.rotLeft(p.parent.parent)
+                p.parent = newParent
         return p
     def find(self, x, p=""):
         if p == "":
@@ -141,5 +153,4 @@ st = splaybinaryTree()
 st.insert(1, 'a')
 st.root = st.insert(2, 'b')
 st.root = st.insert(0, 'x')
-st.root = st.insert(3, 'b')
-st.print2DTree(st.root)
+
