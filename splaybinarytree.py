@@ -37,10 +37,27 @@ class splaybinaryTree:
         q.left.parent = q
         q.right.parent = q
         return q
-
-    def splay(self, p=""):
-        if p == "":
+    def aux_splay(self, x, p=''):
+        if p=='':
             p = self.root
+        if isinstance(p, Nil):
+            return p
+        if p.key == x:
+            return p
+        elif p.key > x:
+            if isinstance(p.left, Nil):
+                return p
+            else:
+                return self.aux_splay(x, p.left)
+        elif p.key < x:
+            if isinstance(p.right, Nil):
+                return p
+            else:
+                return self.aux_splay(x, p.right)
+    def splay(self, x):
+        p = self.aux_splay(x)
+        if isinstance(p, Nil):
+            raise ("Árvore vazia")
         while not isinstance(p.parent, Nil):
             if p.parent == self.root:
                 if self.root.left == p:
@@ -72,75 +89,55 @@ class splaybinaryTree:
                 p.parent.parent = self.rotLeft(p.parent.parent)
                 p.parent = newParent
         return p
-    def find(self, x, p=""):
-        if p == "":
-            p = self.root
-        if x < p.key:
-            return self.find(x, p.left)
-        if x > p.key:
-            return self.find(x, p.right)
+
+    def find(self, x):
+        self.splay(x)
+        if isinstance(self.root, Nil):
+            raise ("Árvore vazia")
+        elif self.root.key == x:
+            return self.root.value
         else:
-            if x == p.key:
-                self.splay(p)
-                return p
-            else:
-                return None
+            return False
 
-    def insert(self, x, v, p=""):
-        if p == "":
-            if isinstance(self.root, Nil):
-                self.root = splaynodeTree(x, v)
-            else:
-                p = self.root
-                return self.insert(x, v, p)
-
-        elif x < p.key:
-            if not isinstance(p.left, Nil):
-                p.left = self.insert(x, v, p.left)
-            else:
-                p.left = splaynodeTree(x, v)
-                p.left.parent = p
-                return self.splay(p.left)
-        elif x > p.key:
-            if not isinstance(p.right,Nil):
-                p.right = self.insert(x, v, p.right)
-            else:
-                p.right = splaynodeTree(x, v)
-                p.right.parent = p
-                return self.splay(p.right)
+    def insert(self, x, v):
+        if isinstance(self.root, Nil):
+            self.root = splaynodeTree(x, v)
         else:
-            return "Chave já inserida"
+            self.splay(x)
+            print(x)
+            self.print2DTree(self.root)
+            if self.root.key == x:
+                raise ("Chave já inserida")
+            if self.root.key > x:
+                newNode = splaynodeTree(x, v)
+                oldRoot = self.root
+                self.root = newNode
+                self.root.right = oldRoot
+            else:
+                newNode = splaynodeTree(x, v)
+                oldRoot = self.root
+                self.root = newNode
+                self.root.left = oldRoot
 
-    def findReplacement(self, p):
-        r = p.right
-        while r.left != None:
-            r = r.left
-        return r
-
-    def delete(self, x, p=""):
-        if p == "":
-            p = self.root
-        if p == None:
-            return "Chave não encontrada"
+    def delete(self, x):
+        self.splay(x)
+        if isinstance(self.root, Nil):
+            raise ("Árvore vazia")
         else:
-            if x < p.key:
-                p.left = self.delete(x, p.left)
-            elif x > p.key:
-                p.right = self.delete(x, p.right)
-            elif p.left == None or p.right == None:
-                if p.left == None:
-                    return p.right
+            if self.root.key == x:
+                if isinstance(self.root.left, Nil) or isinstance(self.root.right, Nil):
+                    if isinstance(self.root.left, Nil):
+                        return self.root.right
+                    else:
+                        return self.root.left
                 else:
-                    return p.left
-            else:
-                r = self.findReplacement(p)
-                p.value = r.value
-                p.key = r.key
-                p.right = self.delete(r.key, p.right)
-        return p
+                    newRoot = self.root.right.splay(x)
+                    oldChild = self.root.left
+                    self.root = newRoot
+                    self.root.left = oldChild
 
     def print2DTree(self, root, space=0, LEVEL_SPACE=5):
-        if isinstance(root,Nil): return
+        if isinstance(root, Nil): return
         space += LEVEL_SPACE
         self.print2DTree(root.right, space)
         # print() # neighbor space
@@ -151,6 +148,8 @@ class splaybinaryTree:
 
 st = splaybinaryTree()
 st.insert(1, 'a')
-st.root = st.insert(2, 'b')
-st.root = st.insert(0, 'x')
-
+st.insert(2, 'b')
+st.insert(0, 'z')
+st.insert(3, 'a')
+st.insert(5, 'c')
+st.insert(4, 'd')
