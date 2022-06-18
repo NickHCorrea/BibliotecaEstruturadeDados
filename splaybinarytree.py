@@ -104,21 +104,28 @@ class splaybinaryTree:
             self.root = splaynodeTree(x, v)
         else:
             self.splay(x)
-            print(x)
-            self.print2DTree(self.root)
             if self.root.key == x:
                 raise ("Chave já inserida")
             if self.root.key > x:
                 newNode = splaynodeTree(x, v)
+                oldChild = self.root.left
                 oldRoot = self.root
+                oldRoot.left = nil
                 self.root = newNode
                 self.root.right = oldRoot
+                self.root.left = oldChild
+                self.root.right.parent = self.root
+                self.root.left.parent = self.root
             else:
                 newNode = splaynodeTree(x, v)
+                #oldChild = self.root.right
                 oldRoot = self.root
+                #oldRoot.right = nil
                 self.root = newNode
                 self.root.left = oldRoot
-
+                #self.root.right = oldChild
+                self.root.right.parent = self.root
+                self.root.left.parent = self.root
     def delete(self, x):
         self.splay(x)
         if isinstance(self.root, Nil):
@@ -149,7 +156,11 @@ class splaybinaryTree:
 st = splaybinaryTree()
 st.insert(1, 'a')
 st.insert(2, 'b')
-st.insert(0, 'z')
 st.insert(3, 'a')
 st.insert(5, 'c')
 st.insert(4, 'd')
+st.insert(7,'v')
+st.insert(6,'a')
+st.insert(8,'f')
+#st.insert(0, 'x')
+st.print2DTree(st.root)
