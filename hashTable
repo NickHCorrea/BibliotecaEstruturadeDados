@@ -1,0 +1,53 @@
+import random
+
+
+class hashTable():
+    def __init__(self, minLoad, maxLoad, size, hashType='Division', collisionHandler='Double Hashing', prime1=193,
+                 prime2=1543, prime3=6151):
+        self.m = size
+        self.data = [None] * self.m
+        self.minLoad = minLoad
+        self.maxLoad = maxLoad
+        self.hashType = hashType
+        self.collisionHandler = collisionHandler
+        self.a = prime1
+        self.p = prime2
+        self.b = prime3
+        if self.hashType == 'uniHash':
+            self.a = random.randint(1, self.p - 1)
+            self.b = random.randint(0, self.p - 1)
+
+    def divHash(self, x):
+        return x % self.m
+
+    def multHash(self, x):
+        return ((self.a * x) % self.p) % self.m
+
+    def linHash(self, x):
+        return ((self.a * x + self.b) % self.p) % self.m
+
+    def poliHash(self, x):
+        p = 37
+        hashValue = 0
+        for i in range(len(x)):
+            hashValue = hashValue * p + ord(x[i])
+        return hashValue % self.m
+
+    def uniHash(self, x):
+        return ((self.a * x + self.b) % self.p) % self.m
+
+    def chosenHash(self, x):
+        if self.hashType == 'divHash':
+            return self.divHash(x)
+        elif self.hashType == 'multHash':
+            return self.multHash(x)
+        elif self.hashType == 'linHash':
+            return self.linHash(x)
+        elif self.hashType == 'poliHash':
+            return self.poliHash(x)
+        elif self.hashType == 'uniHash':
+            return self.uniHash(x)
+
+    def insert(self, x, v):
+        i = self.chosenHash(x)
+        self.data[i] = v
