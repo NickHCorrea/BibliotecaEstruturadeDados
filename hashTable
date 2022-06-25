@@ -1,13 +1,17 @@
 import random
 
 
-class hashTable():
-    def __init__(self, minLoad, maxLoad, size, hashType='Division', collisionHandler='Double Hashing', prime1=193,
+class hashTable:
+    def __init__(self, minLoad, maxLoad, size, hashType='divHash', collisionHandler='separateChaining', prime1=193,
                  prime2=1543, prime3=6151):
         self.m = size
+        self.n = 0
         self.data = [None] * self.m
+        self.allEntries = []
         self.minLoad = minLoad
         self.maxLoad = maxLoad
+        self.idealLoad = (self.minLoad + self.maxLoad) / 2
+        self.currentLoad = self.n / self.m
         self.hashType = hashType
         self.collisionHandler = collisionHandler
         self.a = prime1
@@ -48,6 +52,46 @@ class hashTable():
         elif self.hashType == 'uniHash':
             return self.uniHash(x)
 
-    def insert(self, x, v):
+    def chainInsert(self, x, v):
         i = self.chosenHash(x)
-        self.data[i] = v
+        self.allEntries.append((x, v))
+        if self.data[i] is not None:
+            self.data[i].append(v)
+        else:
+            self.data[i] = [v]
+        self.n += 1
+        self.currentLoad = self.n / self.m
+        if self.currentLoad > self.maxLoad:
+            newTable = hashTable(self.minLoad, self.maxLoad, self.n / self.idealLoad, 'uniHash', self.collisionHandler, self.p, self.a, self.b)
+            for entry in self.allEntries:
+                newTable.insert(entry[0], entry[1])
+            return newTable
+        else:
+            return self
+
+    def linprobInsert(self,x, v):
+        i = self.chosenHash(x)
+        if self.data[i] is not None:
+            for j in range(self.m):
+                if self.data[(i+j)%self.m] is None:
+                    self.data[(i + j) % self.m] = v
+                    return self
+            raise 'Full table'
+        else:
+            self.data[i] = v
+            return self
+
+    def doubleInsert(self, x, v):
+        # nao sei ainda
+
+    def chosenInsert(self, x, v):
+        if self.collisionHandler == 'separateChaining':
+            return self.chainInsert(x, v)
+        elif self.collisionHandler == 'linearProbing':
+            return self.linprobInsert(x, v)
+        elif self.collisionHandler == 'doubleHashing':
+            return self.doubleInsert(x, v)
+
+    def insert(self, x, v):
+        return self.chosenInsert(x, v)
+
