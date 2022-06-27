@@ -1,9 +1,10 @@
+import math
 import random
 
 
 class hashTable:
-    def __init__(self, minLoad, maxLoad, size, hashType='divHash', collisionHandler='doubleHashing', prime1=193,
-                 prime2=1543, prime3=6151, doubleHashType='multHash' ):
+    def __init__(self, minLoad, maxLoad, size, hashType='divHash', collisionHandler='separateChaining', prime1=193,
+                 prime2=1543, prime3=6151, doubleHashType='multHash'):
         self.m = size
         self.n = 0
         self.data = [None] * self.m
@@ -75,7 +76,8 @@ class hashTable:
         self.n += 1
         self.currentLoad = self.n / self.m
         if self.currentLoad > self.maxLoad:
-            newTable = hashTable(self.minLoad, self.maxLoad, self.n / self.idealLoad, 'uniHash', self.collisionHandler,
+            newSize = math.ceil(self.n/ self.idealLoad)
+            newTable = hashTable(self.minLoad, self.maxLoad,newSize, 'uniHash', self.collisionHandler,
                                  self.p, self.a, self.b)
             for entry in self.allEntries:
                 newTable.insert(entry[0], entry[1])
@@ -112,7 +114,6 @@ class hashTable:
             self.data[i] = (x, v)
             return self
 
-
     def chosenInsert(self, x, v):
         if self.collisionHandler == 'separateChaining':
             return self.chainInsert(x, v)
@@ -124,3 +125,55 @@ class hashTable:
     def insert(self, x, v):
         return self.chosenInsert(x, v)
 
+    def chainFind(self, x):
+        i = self.chosenHash(x)
+        if self.data[i] is None:
+            return False
+        else:
+            for item in self.data[i]:
+                if item[0] == x:
+                    return True
+        return False
+
+    def doubleFind(self, x):
+        i = self.chosenHash(x)
+        if self.data[i] is None:
+            return False
+        elif self.data[i][0] == x:
+            return True
+        else:
+            cont = 0
+            while cont < self.m:
+                i2 = (i + cont * self.doubleHash(i)) % self.m
+                if self.data[i2] is None:
+                    return False
+                elif self.data[i2][0] == x:
+                    return True
+                else:
+                    cont += 1
+            return False
+
+    def linprobFind(self, x):
+        i = self.chosenHash(x)
+        if self.data[i] is None:
+            return False
+        elif self.data[i][0] == x:
+            return True
+        else:
+            for j in range(self.m):
+                if self.data[(i + j) % self.m] is None:
+                    return False
+                elif self.data[(i + j) % self.m][0] == x:
+                    return True
+            return False
+
+    def chosenFind(self, x):
+        if self.collisionHandler == 'separateChaining':
+            return self.chainFind(x)
+        elif self.collisionHandler == 'linearProbing':
+            return self.linprobFind(x)
+        elif self.collisionHandler == 'doubleHashing':
+            return self.doubleFind(x)
+
+    def find(self, x):
+        return self.chosenFind(x)
