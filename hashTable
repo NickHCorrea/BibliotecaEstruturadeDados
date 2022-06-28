@@ -66,6 +66,14 @@ class hashTable:
         elif self.doubleHashType == 'uniHash':
             return self.uniHash(x)
 
+    def rehash(self):
+        newSize = math.ceil(self.n / self.idealLoad)
+        newTable = hashTable(self.minLoad, self.maxLoad, newSize, 'uniHash', self.collisionHandler,
+                             self.p, self.a, self.b)
+        for entry in self.allEntries:
+            newTable.insert(entry[0], entry[1])
+        return newTable
+
     def chainInsert(self, x, v):
         i = self.chosenHash(x)
         self.allEntries.append((x, v))
@@ -76,43 +84,60 @@ class hashTable:
         self.n += 1
         self.currentLoad = self.n / self.m
         if self.currentLoad > self.maxLoad:
-            newSize = math.ceil(self.n/ self.idealLoad)
-            newTable = hashTable(self.minLoad, self.maxLoad,newSize, 'uniHash', self.collisionHandler,
-                                 self.p, self.a, self.b)
-            for entry in self.allEntries:
-                newTable.insert(entry[0], entry[1])
-            return newTable
+            return self.rehash()
         else:
             return self
 
     def linprobInsert(self, x, v):
         i = self.chosenHash(x)
+        self.allEntries.append((x, v))
         if self.data[i] is not None:
             for j in range(self.m):
                 if self.data[(i + j) % self.m] is None:
                     self.data[(i + j) % self.m] = (x, v)
-                    return self
+                    self.n += 1
+                    self.currentLoad = self.n / self.m
+                    if self.currentLoad > self.maxLoad:
+                        return self.rehash()
+                    else:
+                        return self
             raise Exception('Full table')
         else:
             self.data[i] = (x, v)
-            return self
+            self.n += 1
+            self.currentLoad = self.n / self.m
+            if self.currentLoad > self.maxLoad:
+                return self.rehash()
+            else:
+                return self
 
     def doubleInsert(self, x, v):
         i = self.chosenHash(x)
+        self.allEntries.append((x, v))
         if self.data[i] is not None:
             cont = 0
             while cont < self.m:
                 i2 = (i + cont * self.doubleHash(i)) % self.m
                 if self.data[i2] is None:
                     self.data[i2] = (x, v)
-                    return self
+                    self.n += 1
+                    self.currentLoad = self.n / self.m
+                    if self.currentLoad > self.maxLoad:
+                        return self.rehash()
+                    else:
+                        return self
                 else:
                     cont += 1
             raise Exception('Full table')
 
         else:
             self.data[i] = (x, v)
-            return self
+            self.n += 1
+            self.currentLoad = self.n / self.m
+            if self.currentLoad > self.maxLoad:
+                return self.rehash()
+            else:
+                return self
 
     def chosenInsert(self, x, v):
         if self.collisionHandler == 'separateChaining':
