@@ -3,7 +3,7 @@ import random
 
 
 class hashTable:
-    def __init__(self, minLoad, maxLoad, size, hashType='divHash', collisionHandler='separateChaining', prime1=193,
+    def __init__(self, minLoad, maxLoad, size, hashType='divHash', collisionHandler='linearProbing', prime1=193,
                  prime2=1543, prime3=6151, doubleHashType='multHash'):
         self.m = size
         self.n = 0
@@ -92,16 +92,25 @@ class hashTable:
         i = self.chosenHash(x)
         self.allEntries[x] = v
         if self.data[i] is not None:
-            for j in range(self.m):
-                if self.data[(i + j) % self.m] is None:
-                    self.data[(i + j) % self.m] = [x, v]
-                    self.n += 1
-                    self.currentLoad = self.n / self.m
-                    if self.currentLoad > self.maxLoad:
-                        return self.rehash()
-                    else:
-                        return self
-            raise Exception('Full table')
+            if self.data[i][0] != 'del':
+                for j in range(self.m):
+                    if self.data[(i + j) % self.m] is None or self.data[(i + j) % self.m][0] == 'del':
+                        self.data[(i + j) % self.m] = [x, v]
+                        self.n += 1
+                        self.currentLoad = self.n / self.m
+                        if self.currentLoad > self.maxLoad:
+                            return self.rehash()
+                        else:
+                            return self
+                raise Exception('Full table')
+            else:
+                self.data[i] = [x, v]
+                self.n += 1
+                self.currentLoad = self.n / self.m
+                if self.currentLoad > self.maxLoad:
+                    return self.rehash()
+                else:
+                    return self
         else:
             self.data[i] = [x, v]
             self.n += 1
@@ -115,20 +124,29 @@ class hashTable:
         i = self.chosenHash(x)
         self.allEntries[x] = v
         if self.data[i] is not None:
-            cont = 0
-            while cont < self.m:
-                i2 = (i + cont * self.doubleHash(i)) % self.m
-                if self.data[i2] is None:
-                    self.data[i2] = [x, v]
-                    self.n += 1
-                    self.currentLoad = self.n / self.m
-                    if self.currentLoad > self.maxLoad:
-                        return self.rehash()
+            if self.data[i][0] != 'del':
+                cont = 0
+                while cont < self.m:
+                    i2 = (i + cont * self.doubleHash(i)) % self.m
+                    if self.data[i2] is None:
+                        self.data[i2] = [x, v]
+                        self.n += 1
+                        self.currentLoad = self.n / self.m
+                        if self.currentLoad > self.maxLoad:
+                            return self.rehash()
+                        else:
+                            return self
                     else:
-                        return self
+                        cont += 1
+                raise Exception('Full table')
+            else:
+                self.data[i] = [x, v]
+                self.n += 1
+                self.currentLoad = self.n / self.m
+                if self.currentLoad > self.maxLoad:
+                    return self.rehash()
                 else:
-                    cont += 1
-            raise Exception('Full table')
+                    return self
 
         else:
             self.data[i] = [x, v]
@@ -242,7 +260,7 @@ class hashTable:
         if self.data[i] is None:
             raise Exception("Key not found in table")
         elif self.data[i][0] == x:
-            self.data[i] = 'del'
+            self.data[i] = ['del', 'n/a']
             self.allEntries.pop(x)
             self.n -= 1
             self.currentLoad = self.n / self.m
@@ -255,7 +273,7 @@ class hashTable:
                 if self.data[(i + j) % self.m] is None:
                     raise Exception("Key not found in table")
                 elif self.data[(i + j) % self.m][0] == x:
-                    self.data[(i + j) % self.m][0] = 'del'
+                    self.data[(i + j) % self.m] = ['del', 'n/a']
                     self.allEntries.pop(x)
                     self.n -= 1
                     self.currentLoad = self.n / self.m
@@ -270,7 +288,7 @@ class hashTable:
         if self.data[i] is None:
             raise Exception("Key not found in table")
         elif self.data[i][0] == x:
-            self.data[i] = 'del'
+            self.data[i] = ['del', 'n/a']
             self.allEntries.pop(x)
             self.n -= 1
             self.currentLoad = self.n / self.m
@@ -285,7 +303,7 @@ class hashTable:
                 if self.data[i2] is None:
                     raise Exception("Key not found in table")
                 elif self.data[i2][0] == x:
-                    self.data[i2] = 'del'
+                    self.data[i2] = ['del', 'n/a']
                     self.allEntries.pop(x)
                     self.n -= 1
                     self.currentLoad = self.n / self.m
