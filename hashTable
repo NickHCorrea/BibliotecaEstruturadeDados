@@ -8,7 +8,7 @@ class hashTable:
         self.m = size
         self.n = 0
         self.data = [None] * self.m
-        self.allEntries = []
+        self.allEntries = {}
         self.minLoad = minLoad
         self.maxLoad = maxLoad
         self.idealLoad = (self.minLoad + self.maxLoad) / 2
@@ -71,16 +71,16 @@ class hashTable:
         newTable = hashTable(self.minLoad, self.maxLoad, newSize, 'uniHash', self.collisionHandler,
                              self.p, self.a, self.b)
         for entry in self.allEntries:
-            newTable.insert(entry[0], entry[1])
+            newTable.insert(entry, self.allEntries[entry])
         return newTable
 
     def chainInsert(self, x, v):
         i = self.chosenHash(x)
-        self.allEntries.append((x, v))
+        self.allEntries[x] = v
         if self.data[i] is not None:
-            self.data[i].append((x, v, self.data[i][-1][2] + 1))
+            self.data[i].append([x, v, self.data[i][-1][2] + 1])
         else:
-            self.data[i] = [(x, v, 1)]
+            self.data[i] = [[x, v, 1]]
         self.n += 1
         self.currentLoad = self.n / self.m
         if self.currentLoad > self.maxLoad:
@@ -90,11 +90,11 @@ class hashTable:
 
     def linprobInsert(self, x, v):
         i = self.chosenHash(x)
-        self.allEntries.append((x, v))
+        self.allEntries[x] = v
         if self.data[i] is not None:
             for j in range(self.m):
                 if self.data[(i + j) % self.m] is None:
-                    self.data[(i + j) % self.m] = (x, v)
+                    self.data[(i + j) % self.m] = [x, v]
                     self.n += 1
                     self.currentLoad = self.n / self.m
                     if self.currentLoad > self.maxLoad:
@@ -103,7 +103,7 @@ class hashTable:
                         return self
             raise Exception('Full table')
         else:
-            self.data[i] = (x, v)
+            self.data[i] = [x, v]
             self.n += 1
             self.currentLoad = self.n / self.m
             if self.currentLoad > self.maxLoad:
@@ -113,13 +113,13 @@ class hashTable:
 
     def doubleInsert(self, x, v):
         i = self.chosenHash(x)
-        self.allEntries.append((x, v))
+        self.allEntries[x] = v
         if self.data[i] is not None:
             cont = 0
             while cont < self.m:
                 i2 = (i + cont * self.doubleHash(i)) % self.m
                 if self.data[i2] is None:
-                    self.data[i2] = (x, v)
+                    self.data[i2] = [x, v]
                     self.n += 1
                     self.currentLoad = self.n / self.m
                     if self.currentLoad > self.maxLoad:
@@ -131,7 +131,7 @@ class hashTable:
             raise Exception('Full table')
 
         else:
-            self.data[i] = (x, v)
+            self.data[i] = [x, v]
             self.n += 1
             self.currentLoad = self.n / self.m
             if self.currentLoad > self.maxLoad:
@@ -155,10 +155,13 @@ class hashTable:
         if self.data[i] is None:
             return False
         else:
-            for item in self.data[i]:
-                if item[0] == x:
-                    return True
-        return False
+            end = self.data[i][-1]
+            start = self.data[i][0]
+            while start[0] != x:
+                if start == end:
+                    return False
+                start = self.data[i][start[2]]
+            return True
 
     def doubleFind(self, x):
         i = self.chosenHash(x)
@@ -202,3 +205,105 @@ class hashTable:
 
     def find(self, x):
         return self.chosenFind(x)
+
+    def chainDelete(self, x):
+        i = self.chosenHash(x)
+        if self.data[i] is None:
+            raise Exception("Key not found in table")
+        else:
+            end = self.data[i][-1]
+            curr = self.data[i][0]
+            if curr[0] == x:
+                self.data[i].pop(0)
+                self.allEntries.pop(x)
+                self.n -= 1
+                self.currentLoad = self.n / self.m
+                if self.currentLoad < self.minLoad:
+                    return self.rehash()
+                else:
+                    return self
+            next = self.data[i][curr[2]]
+            while next[0] != x:
+                if next == end:
+                    raise Exception("Key not found in table")
+                curr = next
+                next = self.data[i][next[2]]
+            curr[2] = next[2]
+            self.allEntries.pop(x)
+            self.n -= 1
+            self.currentLoad = self.n / self.m
+            if self.currentLoad < self.minLoad:
+                return self.rehash()
+            else:
+                return self
+
+    def linearDelete(self, x):
+        i = self.chosenHash(x)
+        if self.data[i] is None:
+            raise Exception("Key not found in table")
+        elif self.data[i][0] == x:
+            self.data[i] = 'del'
+            self.allEntries.pop(x)
+            self.n -= 1
+            self.currentLoad = self.n / self.m
+            if self.currentLoad < self.minLoad:
+                return self.rehash()
+            else:
+                return self
+        else:
+            for j in range(self.m):
+                if self.data[(i + j) % self.m] is None:
+                    raise Exception("Key not found in table")
+                elif self.data[(i + j) % self.m][0] == x:
+                    self.data[(i + j) % self.m][0] = 'del'
+                    self.allEntries.pop(x)
+                    self.n -= 1
+                    self.currentLoad = self.n / self.m
+                    if self.currentLoad < self.minLoad:
+                        return self.rehash()
+                    else:
+                        return self
+            raise Exception("Key not found in table")
+
+    def doubleDelete(self, x):
+        i = self.chosenHash(x)
+        if self.data[i] is None:
+            raise Exception("Key not found in table")
+        elif self.data[i][0] == x:
+            self.data[i] = 'del'
+            self.allEntries.pop(x)
+            self.n -= 1
+            self.currentLoad = self.n / self.m
+            if self.currentLoad < self.minLoad:
+                return self.rehash()
+            else:
+                return self
+        else:
+            cont = 0
+            while cont < self.m:
+                i2 = (i + cont * self.doubleHash(i)) % self.m
+                if self.data[i2] is None:
+                    raise Exception("Key not found in table")
+                elif self.data[i2][0] == x:
+                    self.data[i2] = 'del'
+                    self.allEntries.pop(x)
+                    self.n -= 1
+                    self.currentLoad = self.n / self.m
+                    if self.currentLoad < self.minLoad:
+                        return self.rehash()
+                    else:
+                        return self
+                else:
+                    cont += 1
+            raise Exception("Key not found in table")
+
+    def chosenDelete(self, x):
+        if self.collisionHandler == 'separateChaining':
+            return self.chainDelete(x)
+        elif self.collisionHandler == 'linearProbing':
+            return self.linearDelete(x)
+        elif self.collisionHandler == 'doubleHashing':
+            return self.doubleDelete(x)
+
+    def delete(self, x):
+        return self.chosenDelete(x)
