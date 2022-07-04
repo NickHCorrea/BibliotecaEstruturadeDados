@@ -32,7 +32,8 @@ class binaryTree:
         elif x>p.key:
             p.right = self.insert(x, v, p.right)
         else:
-            return "Chave já inserida"
+            #return "Chave já inserida"
+            raise Exception("Chave já inserida")
         return p
 
     def findReplacement(self, p):
@@ -44,7 +45,8 @@ class binaryTree:
         if p == "":
             p = self.root
         if p == None:
-            return "Chave não encontrada"
+            #return "Chave não encontrada"
+            raise Exception("Chave não encontrada")
         else:
             if x < p.key:
                 p.left = self.delete(x, p.left)
