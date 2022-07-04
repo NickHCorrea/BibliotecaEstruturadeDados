@@ -5,7 +5,6 @@ class nodeTree:
         self.left = lc
         self.right = rc
 
-
 class binaryTree:
     def __init__(self, rt=None):
         self.root = rt
