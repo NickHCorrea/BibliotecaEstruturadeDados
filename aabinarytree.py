@@ -79,19 +79,12 @@ class AAbinaryTree:
         return p
 
     def fixupAfterDelete(self, p):
-        print('fix')
         p = self.updateLevel(p)
-        self.print2DTree(self.root)
         p = self.skew(p)
-        self.print2DTree(self.root)
         p.right = self.skew(p.right)
-        self.print2DTree(self.root)
         p.right.right = self.skew(p.right.right)
-        self.print2DTree(self.root)
         p = self.split(p)
-        self.print2DTree(self.root)
         p.right = self.split(p.right)
-        self.print2DTree(self.root)
 
         return p
 
