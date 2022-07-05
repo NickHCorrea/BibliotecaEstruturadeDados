@@ -54,14 +54,14 @@ class TreapbinaryTree:
             if p.right and p.right.priority > p.priority:
                 p = self.rotLeft(p)
         else:
-            raise ValueError("Chave já inserida")
+            raise Exception("Chave já inserida")
         return p
 
     def delete(self, x, p=""):
         if p == "":
             p = self.root
         if p == None:
-            raise ValueError("Chave não encontrada")
+            raise Exception("Chave não encontrada")
         else:
             if x < p.key:
                 p.left = self.delete(x, p.left)
