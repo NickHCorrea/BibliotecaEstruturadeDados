@@ -73,7 +73,7 @@ class AVLbinaryTree:
                 p.right = self.delete(r.key, p.right)
         return self.rebalance(p)
 
-    def updateHeight(self, p=""):
+    def updateHeight(self, p):
         if p == "":
             p = self.root
         p.height = max(height(p.left), height(p.right)) + 1
@@ -82,7 +82,7 @@ class AVLbinaryTree:
             p = self.root
         return height(p.right) - height(p.left)
 
-    def rotRight(self, p=""):
+    def rotRight(self, p):
         q = p.left
         p.left = q.right
         q.right = p
@@ -90,7 +90,7 @@ class AVLbinaryTree:
         self.updateHeight(q)
         return q
 
-    def rotLeft(self, p=""):
+    def rotLeft(self, p):
         q = p.right
         p.right = q.left
         q.left = p
@@ -98,11 +98,11 @@ class AVLbinaryTree:
         self.updateHeight(q)
         return q
 
-    def rotRightLeft(self, p=""):
+    def rotRightLeft(self, p):
         p.right = self.rotRight(p.right)
         return self.rotLeft(p)
 
-    def rotLeftRight(self, p=""):
+    def rotLeftRight(self, p):
         p.left = self.rotLeft(p.left)
         return self.rotRight(p)
 
