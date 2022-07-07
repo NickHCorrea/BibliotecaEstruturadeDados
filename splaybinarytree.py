@@ -1,150 +1,167 @@
-class Nil:
-    def __init__(self):
-        self.right = self
-        self.left = self
-
-
-nil = Nil()
-
-
 class splaynodeTree:
-    def __init__(self, k, v, lc=nil, rc=nil):
+    def __init__(self, k, v, lc=None, rc=None):
         self.key = k
         self.value = v
-        self.parent = nil
         self.left = lc
         self.right = rc
+        self.parent = None
 
 
 class splaybinaryTree:
-    def __init__(self, rt=nil):
+    def __init__(self, rt=None):
         self.root = rt
 
-    def rotRight(self, p):
-        q = p.left
-        p.left = q.right
-        q.right = p
-        q.parent = p.parent
-        q.left.parent = q
-        q.right.parent = q
-        return q
+    def zigzigLL(self, p, q, r):
+        prev = r.parent
+        r.left = q.right
+        q.left = p.right
+        p.right = q
+        q.right = r
 
-    def rotLeft(self, p):
-        q = p.right
-        p.right = q.left
-        q.left = p
-        q.parent = p.parent
-        q.left.parent = q
-        q.right.parent = q
-        return q
+        if r.left is not None:
+            r.left.parent = r
+        if q.right is not None:
+            q.right.parent = q
+        p.parent = prev
+        q.parent = p
+        r.parent = q
+
+    def zigzigRR(self, p, q, r):
+        prev = r.parent
+        r.right = q.left
+        q.right = p.left
+        p.left = q
+        q.left = r
+
+        if r.right is not None:
+            r.right.parent = r
+        if q.left is not None:
+            q.left.parent = q
+        p.parent = prev
+        q.parent = p
+        r.parent = q
+
+    def zigzagLR(self, p, q, r):  # r.left = q, q.right = p
+        prev = r.parent
+        r.left = p.right
+        q.right = p.left
+        p.left = q
+        p.right = r
+
+        if r.left is not None:
+            r.left.parent = r
+        if q.right is not None:
+            q.right.parent = q
+        p.parent = prev
+        q.parent = p
+        r.parent = p
+
+    def zigzagRL(self, p, q, r):  # r.right = q, q.left = p
+        prev = r.parent
+        r.right = p.left
+        q.left = p.right
+        p.right = q
+        p.left = r
+
+        if r.right is not None:
+            r.right.parent = r
+        if q.left is not None:
+            q.left.parent = q
+        p.parent = prev
+        q.parent = p
+        r.parent = p
+
+    def zigL(self, p, oldRoot):
+        oldRoot.left = p.left
+        p.right = oldRoot
+
+        p.right.parent = p
+        p.parent = None
+        # Update root
+        self.root = p
+
+    def zigR(self, p, oldRoot):
+        oldRoot.right = p.right
+        p.left = oldRoot
+
+        p.left.parent = p
+        p.parent = None
+        # Update root
+        self.root = p
+
     def aux_splay(self, x, p=''):
-        if p=='':
+        if p == '':
             p = self.root
-        if isinstance(p, Nil):
+        if p is None:
             return p
         if p.key == x:
             return p
         elif p.key > x:
-            if isinstance(p.left, Nil):
+            if p.left is None:
                 return p
             else:
                 return self.aux_splay(x, p.left)
         elif p.key < x:
-            if isinstance(p.right, Nil):
+            if p.right is None:
                 return p
             else:
                 return self.aux_splay(x, p.right)
+
     def splay(self, x):
         p = self.aux_splay(x)
-        if isinstance(p, Nil):
-            raise ("Árvore vazia")
-        while not isinstance(p.parent, Nil):
+        if self.root is None:
+            raise Exception("Empty tree")
+
+        while p.parent is not None:
             if p.parent == self.root:
-                if self.root.left == p:
-                    newParent = p.parent.parent
-                    p.parent = self.rotRight(p.parent)
-                    p.parent = newParent
+                if p == p.parent.left:
+                    self.zigL(p, p.parent)
                 else:
-                    newParent = p.parent.parent
-                    p.parent = self.rotLeft(p.parent)
-                    p.parent = newParent
-            elif p.parent.left == p and p.parent.parent.left == p.parent:  # Left Left grandkid - zig zig
-                newParent = p.parent.parent.parent
-                p.parent.parent = self.rotRight(p.parent.parent)
-                p.parent = self.rotRight(p.parent)
-                p.parent = newParent
-            elif p.parent.right == p and p.parent.parent.right == p.parent:  # right right grandkid - zig zig
-                newParent = p.parent.parent.parent
-                p.parent.parent = self.rotLeft(p.parent.parent)
-                p.parent = self.rotLeft(p.parent)
-                p.parent = newParent
-            elif p.parent.right == p and p.parent.parent.left == p.parent:  # left right grandkid - zig zag
-                newParent = p.parent.parent.parent
-                p.parent = self.rotLeft(p.parent)
-                p.parent.parent = self.rotRight(p.parent.parent)
-                p.parent = newParent
-            elif p.parent.left == p and p.parent.parent.right == p.parent:  # right left grandkid - zig zag
-                newParent = p.parent.parent.parent
-                p.parent = self.rotRight(p.parent)
-                p.parent.parent = self.rotLeft(p.parent.parent)
-                p.parent = newParent
+                    self.zigR(p, p.parent)
+
+            else:
+                father = p.parent
+                granpa = father.parent
+
+                if p.parent.left == p and father.parent.left == father:
+                     self.zigzigLL(p, father, granpa)
+                elif p.parent.right == p and father.parent.right == father:
+                    self.zigzigRR(p, father, granpa)
+                elif p.parent.right == p and father.parent.left == father:
+                    self.zigzagLR(p, father, granpa)
+                else:
+                    self.zigzagRL(p, father, granpa)
+        self.root = p
+        self.root.parent = None
+    def insert(self, x, v):
+        self.root = self.aux_insert(x, v)
+        self.splay(x)
+
+    def aux_insert(self, x, v, p=""):
+        if p == "":
+            p = self.root
+        if p is None:
+            p = splaynodeTree(x,v)
+        elif x < p.key:
+            if p.left is None:
+                p.left = splaynodeTree(x, v, None, None)
+                p.left.parent = p
+                return p
+            else:
+                p.left = self.aux_insert(x, v, p.left)
+        elif x > p.key:
+            if p.right is None:
+                p.right = splaynodeTree(x, v, None, None)
+                p.right.parent = p
+                return p
+            else:
+                p.right = self.aux_insert(x, v, p.right)
+        else:
+            raise Exception("Chave já inserida")
         return p
 
-    def find(self, x):
-        self.splay(x)
-        if isinstance(self.root, Nil):
-            raise ("Árvore vazia")
-        elif self.root.key == x:
-            return self.root.value
-        else:
-            return False
-
-    def insert(self, x, v):
-        if isinstance(self.root, Nil):
-            self.root = splaynodeTree(x, v)
-        else:
-            self.splay(x)
-            if self.root.key == x:
-                raise ("Chave já inserida")
-            if self.root.key > x:
-                newNode = splaynodeTree(x, v)
-                oldChild = self.root.left
-                oldRoot = self.root
-                oldRoot.left = nil
-                self.root = newNode
-                self.root.right = oldRoot
-                self.root.left = oldChild
-                self.root.right.parent = self.root
-                self.root.left.parent = self.root
-            else:
-                newNode = splaynodeTree(x, v)
-                #oldChild = self.root.right
-                oldRoot = self.root
-                #oldRoot.right = nil
-                self.root = newNode
-                self.root.left = oldRoot
-                #self.root.right = oldChild
-                self.root.right.parent = self.root
-                self.root.left.parent = self.root
-    def delete(self, x):
-        self.splay(x)
-        if isinstance(self.root, Nil):
-            raise ("Árvore vazia")
-        else:
-            if self.root.key == x:
-                if isinstance(self.root.left, Nil) or isinstance(self.root.right, Nil):
-                    if isinstance(self.root.left, Nil):
-                        return self.root.right
-                    else:
-                        return self.root.left
-                else:
-                    newRoot = self.root.right.splay(x)
-                    oldChild = self.root.left
-                    self.root = newRoot
-                    self.root.left = oldChild
-
     def print2DTree(self, root, space=0, LEVEL_SPACE=5):
-        if isinstance(root, Nil): return
+        if root == None: return
         space += LEVEL_SPACE
         self.print2DTree(root.right, space)
         # print() # neighbor space
@@ -158,9 +175,11 @@ st.insert(1, 'a')
 st.insert(2, 'b')
 st.insert(3, 'a')
 st.insert(5, 'c')
+
 st.insert(4, 'd')
-st.insert(7,'v')
-st.insert(6,'a')
-st.insert(8,'f')
-#st.insert(0, 'x')
+st.insert(7, 'v')
+st.insert(6, 'a')
+st.insert(8, 'f')
+
+st.insert(0, 'x')
 st.print2DTree(st.root)
